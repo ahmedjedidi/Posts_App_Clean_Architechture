@@ -9,20 +9,21 @@ import 'package:posts_clean_architechture/features/posts/domain/usecases/add_pos
 import 'package:posts_clean_architechture/features/posts/domain/usecases/delete_post.dart';
 import 'package:posts_clean_architechture/features/posts/domain/usecases/get_all_posts.dart';
 import 'package:posts_clean_architechture/features/posts/domain/usecases/update_post.dart';
-import 'package:posts_clean_architechture/features/posts/presentation/bloc/add_delete_update_post/add_delete_update_post_bloc.dart';
-import 'package:posts_clean_architechture/features/posts/presentation/bloc/posts/posts_bloc.dart';
+import 'package:posts_clean_architechture/features/posts/presentation/riverpood/add_delete_update_post/add_delete_update_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+
+import 'features/posts/presentation/riverpood/posts/posts_notifier.dart';
+
 final sl = GetIt.instance;
 
-Future<void> init() async{
-
+Future<void> init() async {
   //!Features - Posts
 
-
-  //bloc
-  sl.registerFactory(() => PostsBloc(getAllPosts: sl()));
-  sl.registerFactory(() => AddDeleteUpdatePostBloc(addPost: sl(),deletePost: sl(),updatePost: sl()));
+  //riverpood
+  sl.registerFactory(() => PostsNotifier(getAllPosts: sl()));
+  sl.registerFactory(() => AddDeleteUpdatePostNotifier(
+      addPostUseCase: sl(), deletePostUseCase: sl(), updatePostUseCase: sl()));
 
   //uses_cases
 
@@ -32,17 +33,18 @@ Future<void> init() async{
   sl.registerLazySingleton(() => DeletePostUseCase(sl()));
 
   //repository
-  
-   sl.registerLazySingleton<PostsRepository>(() => PostsRepositoryImpl(
-   postRemoteDataSources: sl(),
-   postLocalDataSources: sl(), 
-   networkInfo: sl()));
+
+  sl.registerLazySingleton<PostsRepository>(() => PostsRepositoryImpl(
+      postRemoteDataSources: sl(),
+      postLocalDataSources: sl(),
+      networkInfo: sl()));
 
   //data_sources
 
-  sl.registerLazySingleton<PostRemoteDataSources>(() => PostRemoteDataSourcesImpl(client: sl()));
-  sl.registerLazySingleton<PostLocalDataSources>(() => PostLocalDataSourcesImpl(sharedPreferences: sl()));
-
+  sl.registerLazySingleton<PostRemoteDataSources>(
+      () => PostRemoteDataSourcesImpl(client: sl()));
+  sl.registerLazySingleton<PostLocalDataSources>(
+      () => PostLocalDataSourcesImpl(sharedPreferences: sl()));
 
   //core
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
@@ -52,7 +54,4 @@ Future<void> init() async{
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => InternetConnectionChecker());
-
-
-
 }

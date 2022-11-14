@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:posts_clean_architechture/features/posts/presentation/bloc/add_delete_update_post/add_delete_update_post_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:posts_clean_architechture/features/posts/presentation/riverpood/add_delete_update_post/add_delete_update_provider.dart';
 
 class DeleteDialogWidget extends StatelessWidget {
   final int postId;
-  const DeleteDialogWidget({super.key, required this.postId});
+  final WidgetRef ref;
+  const DeleteDialogWidget({super.key, required this.postId, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +18,7 @@ class DeleteDialogWidget extends StatelessWidget {
         ),
         TextButton(
             onPressed: () => {
-                  BlocProvider.of<AddDeleteUpdatePostBloc>(context)
-                      .add(DeletePostEvent(postId: postId))
+                  ref.read(addDeleteUpdatePostProvider.notifier).deletePost(postId)
                 },
             child: Text("Yes"))
       ],

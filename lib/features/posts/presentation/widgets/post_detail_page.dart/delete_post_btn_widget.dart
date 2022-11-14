@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:posts_clean_architechture/core/utils/snackbar_message.dart';
 import 'package:posts_clean_architechture/core/widgets/loading_widget.dart';
-import 'package:posts_clean_architechture/features/posts/presentation/bloc/add_delete_update_post/add_delete_update_post_bloc.dart';
 import 'package:posts_clean_architechture/features/posts/presentation/pages/posts_page.dart';
 import 'package:posts_clean_architechture/features/posts/presentation/widgets/post_detail_page.dart/delete_dialog_widget.dart';
+
+import '../../riverpood/add_delete_update_post/add_delete_update_provider.dart';
+import '../../riverpood/add_delete_update_post/add_delete_update_state.dart';
 
 class DeletePostBtnWidget extends StatelessWidget {
   final int postId;
@@ -25,31 +27,34 @@ class DeletePostBtnWidget extends StatelessWidget {
     showDialog(
         context: context,
         builder: (context) {
-          return BlocConsumer<AddDeleteUpdatePostBloc,
-              AddDeleteUpdatePostState>(
-            listener: (context, state) {
+       return  Consumer(
+        builder: (context, ref, child) {
+          final state = ref.watch(addDeleteUpdatePostProvider);
               // TODO: implement listener
-              if (state is MessageAddDeleteUpdatePostState) {
+               ref.listen(
+              addDeleteUpdatePostProvider,
+              ((previous, next) => {
+                    if (next is MessageAddDeleteUpdatePostState) {
                 SnackBarMessage().ShowSuccessSnackBar(
-                    message: state.message, context: context);
+                    message: next.message, context: context),
                 Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => PostsPage()),
-                    (route) => false);
-              } else if (state is ErrorAddDeleteUpdatePostState) {
-                Navigator.of(context).pop();
+                    (route) => false),
+              } else if (next is ErrorAddDeleteUpdatePostState) {
+                Navigator.of(context).pop(),
                 SnackBarMessage().ShowErrorSnackBar(
-                    message: state.message, context: context);
+                    message: next.message, context: context)
               }
-            },
-            builder: (context, state) {
-              if (state is LoadingAddDeleteUpdatePostState) {
+              
+                  }));
+               if (state is LoadingAddDeleteUpdatePostState) {
                 return AlertDialog(
                   title: LoadingWidget(),
                 );
               }
-              return DeleteDialogWidget(postId: postId);
-            },
+              return DeleteDialogWidget(postId: postId,ref:ref);
+            }
           );
         });
   }

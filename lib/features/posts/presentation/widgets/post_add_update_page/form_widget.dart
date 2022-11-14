@@ -2,16 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:posts_clean_architechture/features/posts/domain/entities/post.dart';
-import 'package:posts_clean_architechture/features/posts/presentation/bloc/add_delete_update_post/add_delete_update_post_bloc.dart';
 import 'package:posts_clean_architechture/features/posts/presentation/widgets/post_add_update_page/form_submit_btn.dart';
 import 'package:posts_clean_architechture/features/posts/presentation/widgets/post_add_update_page/text_form_field_widget.dart';
+
+import '../../riverpood/add_delete_update_post/add_delete_update_provider.dart';
 
 class FormWidget extends StatefulWidget {
   final bool isUpdate;
   final Post? post;
-  const FormWidget({super.key, required this.isUpdate, this.post});
+  final WidgetRef ref;
+  const FormWidget(
+      {super.key, required this.isUpdate, this.post, required this.ref});
 
   @override
   State<FormWidget> createState() => _FormWidgetState();
@@ -39,10 +42,15 @@ class _FormWidgetState extends State<FormWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextFormFieldWidget(name:"Title",multiline:false,controller:_titleEditingController),
-            TextFormFieldWidget(name:"Body",multiline:true,controller:_bodyEditingController),
-            FormSubmitBtn(isUpdate:widget.isUpdate, onPressed: _validateForm),
-           
+            TextFormFieldWidget(
+                name: "Title",
+                multiline: false,
+                controller: _titleEditingController),
+            TextFormFieldWidget(
+                name: "Body",
+                multiline: true,
+                controller: _bodyEditingController),
+            FormSubmitBtn(isUpdate: widget.isUpdate, onPressed: _validateForm),
           ]),
     );
   }
@@ -56,11 +64,11 @@ class _FormWidgetState extends State<FormWidget> {
 
     if (isFormValid) {
       if (widget.isUpdate) {
-        BlocProvider.of<AddDeleteUpdatePostBloc>(context)
-            .add(UpdatePostEvent(post: post));
+        widget.ref
+            .read(addDeleteUpdatePostProvider.notifier).updatePost(post);
+            
       } else {
-        BlocProvider.of<AddDeleteUpdatePostBloc>(context)
-            .add(AddPostEvent(post: post));
+        widget.ref.read(addDeleteUpdatePostProvider.notifier).addPost(post);
       }
     }
   }

@@ -1,4 +1,4 @@
-part of 'add_delete_update_post_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 abstract class AddDeleteUpdatePostState extends Equatable {
   const AddDeleteUpdatePostState();
